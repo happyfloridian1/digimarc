@@ -4,9 +4,13 @@ test.beforeEach(async ({ page }) => {
   await page.goto("https://todoist.devgossips.vercel.app/");
 });
 
+test.afterEach(async ({ page }) => {
+  await page.close();
+});
+
 const TODO_ITEMS = ["Purchase a cake", "Purchase milk", "Go to Library"];
 
-test("should allow me to add items", async ({ page }) => {
+test.only("should allow me to add items", async ({ page }) => {
   // create a new todo locator
   const newTodoInput = page.getByPlaceholder("What's up ? ...");
 
@@ -22,17 +26,20 @@ test("should allow me to add items", async ({ page }) => {
   await newTodoInput.press("Enter");
 
   // Make sure the list now has two todo items.
-  await expect(page.getByText(TODO_ITEMS[0])).toBeVisible();
-  await expect(page.getByText(TODO_ITEMS[1])).toBeVisible();
+  await expect(
+    page.getByText(TODO_ITEMS[0]) && page.getByText(TODO_ITEMS[1])
+  ).toBeVisible();
 
   // Create 3rd todo.
   await newTodoInput.fill(TODO_ITEMS[2]);
   await newTodoInput.press("Enter");
 
   // Make sure the list now has two todo items.
-  await expect(page.getByText(TODO_ITEMS[0])).toBeVisible();
-  await expect(page.getByText(TODO_ITEMS[1])).toBeVisible();
-  await expect(page.getByText(TODO_ITEMS[2])).toBeVisible();
+  await expect(
+    page.getByText(TODO_ITEMS[0]) &&
+      page.getByText(TODO_ITEMS[1]) &&
+      page.getByText(TODO_ITEMS[2])
+  ).toBeVisible();
 });
 
 test("should allow me to mark items as done", async ({ page }) => {
