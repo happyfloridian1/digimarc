@@ -58,6 +58,28 @@ test("should allow me to mark items as done", async ({ page }) => {
   await expect(markedItem).toBeVisible();
 });
 
+test("should allow me to edit an item", async ({ page }) => {
+  //create a to do item
+  const newTodoInput = page.getByPlaceholder("What's up ? ...");
+  await newTodoInput.fill(TODO_ITEMS[1]);
+  await newTodoInput.press("Enter");
+
+  // Make sure the list only has one todo item.
+  await expect(page.getByText(TODO_ITEMS[1])).toBeVisible();
+
+  //edit the item
+  const itemToEdit = page.getByText(TODO_ITEMS[1]);
+
+  await itemToEdit.click();
+  await page.getByRole("textbox").nth(1).fill("");
+  await page.getByRole("textbox").nth(1).fill("Buy plant-based milk");
+  await page.getByRole("textbox").nth(1).press("Enter");
+
+  await sleep(5000);
+
+  await expect(page.getByText("Buy plant-based milk")).toBeVisible();
+});
+
 test("should allow me to change the theme", async ({ page }) => {
   // create locators for the dark & light theme buttons
   const darkModeButton = page.locator(
