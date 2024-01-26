@@ -75,8 +75,6 @@ test("should allow me to edit an item", async ({ page }) => {
   await page.getByRole("textbox").nth(1).fill("Buy plant-based milk");
   await page.getByRole("textbox").nth(1).press("Enter");
 
-  await sleep(5000);
-
   await expect(page.getByText("Buy plant-based milk")).toBeVisible();
 });
 
@@ -123,6 +121,54 @@ test("should allow me to change the theme", async ({ page }) => {
     await expect(darkModeButton).toBeHidden();
     await expect(lightModeButton).toBeVisible();
   }
+});
+
+test("should track the session stats", async ({ page }) => {
+  // create a new todo locator
+  const newTodoInput = page.getByPlaceholder("What's up ? ...");
+
+  // Create todo items.
+  await newTodoInput.fill(TODO_ITEMS[0]);
+  await newTodoInput.press("Enter");
+  await newTodoInput.fill(TODO_ITEMS[1]);
+  await newTodoInput.press("Enter");
+  await newTodoInput.fill(TODO_ITEMS[2]);
+  await newTodoInput.press("Enter");
+
+  // Make sure the list now has all todo items.
+  await expect(page.getByText(TODO_ITEMS[0])).toBeVisible();
+  await expect(page.getByText(TODO_ITEMS[1])).toBeVisible();
+  await expect(page.getByText(TODO_ITEMS[2])).toBeVisible();
+
+  //mark one item as completed
+  const checklistButton = page.locator("(//button[@aria-label='done'])[2]");
+  await checklistButton.click();
+
+  //edit one item
+  const itemToEdit = page.getByText(TODO_ITEMS[1]);
+
+  await itemToEdit.click();
+  await page.getByRole("textbox").nth(1).fill("");
+  await page.getByRole("textbox").nth(1).fill("Buy plant-based milk");
+  await page.getByRole("textbox").nth(1).press("Enter");
+
+  await sleep(5000);
+
+  //cards locators
+  const addedItems = page.locator(
+    "//dt[normalize-space()='Added']/following-sibling::dd[1]"
+  );
+  const completedItems = page.locator(
+    "//dt[normalize-space()='Completed']/following-sibling::dd[1]"
+  );
+  const editedItems = page.locator(
+    "//dt[normalize-space()='Edited']/following-sibling::dd[1]"
+  );
+
+  //assert
+  await expect(addedItems).toContainText("3 items");
+  await expect(completedItems).toContainText("1 items");
+  await expect(editedItems).toContainText("1 times");
 });
 
 function sleep(ms: number): Promise<void> {
